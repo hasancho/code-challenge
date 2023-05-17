@@ -2,6 +2,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Main from './pages/home';
 import AddNote from './pages/add-notes';
 import AddTag from './pages/add-tag';
+import DetailNote from './pages/detail-note';
 
 const router = createBrowserRouter([
   {
@@ -15,6 +16,10 @@ const router = createBrowserRouter([
   {
     path: '/add-tag',
     element: <AddTag />,
+  },
+  {
+    path: '/note-detail/:id',
+    element: <DetailNote />,
   },
 ]);
 
