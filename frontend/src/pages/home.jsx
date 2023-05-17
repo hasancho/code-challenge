@@ -1,4 +1,54 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
+
 export default function main() {
+  const [noteTag, setNoteTag] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredData, setFilteredData] = useState([]);
+
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/note');
+        setNoteTag(response.data.data);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleDeleteNote = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/note/${id}`);
+      const newNoteTag = noteTag.filter((note) => note.id !== response.data.id);
+      setNoteTag(newNoteTag);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    filterData(event.target.value);
+  };
+
+  const filterData = (term) => {
+    const filtered = noteTag.filter((item) => {
+      return item.title.toLowerCase().includes(term.toLowerCase());
+    });
+    console.log(filtered);
+    setFilteredData(filtered);
+    setNoteTag(filtered);
+  };
+
   return (
     <div>
       <div className='mx-auto container py-5 px-6'>
@@ -80,121 +130,123 @@ export default function main() {
                 </svg>
               </div>
               <input
-                type='search'
+                type='text'
+                placeholder='Search by title...'
+                value={searchTerm}
+                onChange={handleSearch}
                 id='default-search'
                 className='block w-full p-4 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
-                placeholder='Search Notes'
-                required
               />
-              <button
+              {/* <button
                 type='submit'
                 className='text-white absolute right-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800'
               >
                 Search
-              </button>
+              </button> */}
             </div>
           </form>
         </div>
         <div className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
-          <div className='rounded'>
-            <div className='w-full h-64 flex flex-col justify-between items-start bg-blue-300 rounded-lg border border-blue-300 mb-6 py-5 px-4'>
-              <div>
-                <h4 className='text-gray-800 font-bold mb-3'>
-                  13 things to work on
-                </h4>
-                <p className='text-gray-800 text-sm'>
-                  Probabo, inquit, sic agam, ut labore et voluptatem sequi
-                  nesciunt, neque porro quisquam est, quid malum, sensu iudicari
-                </p>
-              </div>
-              <div>
-                <span className='bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300'>
-                  Study
-                </span>
-                <span className='bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300'>
-                  Work
-                </span>
-                <span className='bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300'>
-                  College
-                </span>
-              </div>
-              <div className='w-full flex flex-col items-start'>
-                <div className='flex items-center justify-between text-gray-800 w-full'>
-                  <p className='text-sm pr-20'>March 28, 2020</p>
-                  <button
-                    className='w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
-                    aria-label='edit note'
-                    role='button'
-                  >
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      className='icon icon-tabler icon-tabler-eye'
-                      width={20}
-                      height={20}
-                      viewBox='0 0 24 24'
-                      strokeWidth='1.5'
-                      stroke='currentColor'
-                      fill='none'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
+          {noteTag.map((note) => (
+            <div className='rounded' key={note.id}>
+              <div className='w-full h-64 flex flex-col justify-between items-start bg-blue-300 rounded-lg border border-blue-300 mb-6 py-5 px-4'>
+                <div>
+                  <h4 className='text-gray-800 font-bold mb-3'>{note.title}</h4>
+                  <p className='text-gray-800 text-sm'>{note.content}</p>
+                </div>
+                <div className='flex'>
+                  {note.Tag.map((tag) => (
+                    <div className='' key={tag.id}>
+                      <span className='bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full dark:bg-gray-700 dark:text-gray-300'>
+                        {tag.name}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className='w-full flex flex-col items-start'>
+                  <div className='flex items-center justify-between text-gray-800 w-full'>
+                    <p className='text-sm pr-20'>
+                      {formatDate(note.createdAt)}
+                    </p>
+                    <Link to={`/note-detail/${note.id}`}>
+                      <button
+                        className='w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
+                        aria-label='edit note'
+                        role='button'
+                      >
+                        <svg
+                          xmlns='http://www.w3.org/2000/svg'
+                          className='icon icon-tabler icon-tabler-eye'
+                          width={20}
+                          height={20}
+                          viewBox='0 0 24 24'
+                          strokeWidth='1.5'
+                          stroke='currentColor'
+                          fill='none'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        >
+                          <path stroke='none' d='M0 0h24v24H0z' />
+                          <circle cx='12' cy='12' r='2' />
+                          <path d='M2 12s4 -8 10 -8c6 0 10 8 10 8s-4 8 -10 8c-6 0 -10 -8 -10 -8' />
+                          <path d='M22 12c-1.4 2.8 -4.5 6 -10 6c-5.5 0 -8.6 -3.2 -10 -6c1.4 -2.8 4.5 -6 10 -6c5.5 0 8.6 3.2 10 6z' />
+                        </svg>
+                      </button>
+                    </Link>
+                    {/* <button
+                      className='w-8 h-8 rounded-full bg-blue-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
+                      aria-label='edit note'
+                      role='button'
                     >
-                      <path stroke='none' d='M0 0h24v24H0z' />
-                      <circle cx='12' cy='12' r='2' />
-                      <path d='M2 12s4 -8 10 -8c6 0 10 8 10 8s-4 8 -10 8c-6 0 -10 -8 -10 -8' />
-                      <path d='M22 12c-1.4 2.8 -4.5 6 -10 6c-5.5 0 -8.6 -3.2 -10 -6c1.4 -2.8 4.5 -6 10 -6c5.5 0 8.6 3.2 10 6z' />
-                    </svg>
-                  </button>
-                  <button
-                    className='w-8 h-8 rounded-full bg-blue-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
-                    aria-label='edit note'
-                    role='button'
-                  >
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      className='icon icon-tabler icon-tabler-pencil'
-                      width={20}
-                      height={20}
-                      viewBox='0 0 24 24'
-                      strokeWidth='1.5'
-                      stroke='currentColor'
-                      fill='none'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='icon icon-tabler icon-tabler-pencil'
+                        width={20}
+                        height={20}
+                        viewBox='0 0 24 24'
+                        strokeWidth='1.5'
+                        stroke='currentColor'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      >
+                        <path stroke='none' d='M0 0h24v24H0z' />
+                        <path d='M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4' />
+                        <line x1='13.5' y1='6.5' x2='17.5' y2='10.5' />
+                      </svg>
+                    </button> */}
+                    <button
+                      onClick={() => handleDeleteNote(note.id)}
+                      className='w-8 h-8 rounded-full bg-red-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
+                      aria-label='edit note'
+                      role='button'
                     >
-                      <path stroke='none' d='M0 0h24v24H0z' />
-                      <path d='M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4' />
-                      <line x1='13.5' y1='6.5' x2='17.5' y2='10.5' />
-                    </svg>
-                  </button>
-                  <button
-                    className='w-8 h-8 rounded-full bg-red-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
-                    aria-label='edit note'
-                    role='button'
-                  >
-                    <svg
-                      xmlns='http://www.w3.org/2000/svg'
-                      className='icon icon-tabler icon-tabler-trash'
-                      width={20}
-                      height={20}
-                      viewBox='0 0 24 24'
-                      strokeWidth='1.5'
-                      stroke='currentColor'
-                      fill='none'
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    >
-                      <path stroke='none' d='M0 0h24v24H0z' />
-                      <line x1='4' y1='7' x2='20' y2='7' />
-                      <line x1='10' y1='11' x2='10' y2='17' />
-                      <line x1='14' y1='11' x2='14' y2='17' />
-                      <path d='M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12' />
-                      <path d='M9 4h6a2 2 0 0 1 2 2v2h-10v-2a2 2 0 0 1 2 -2' />
-                    </svg>
-                  </button>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='icon icon-tabler icon-tabler-trash'
+                        width={20}
+                        height={20}
+                        viewBox='0 0 24 24'
+                        strokeWidth='1.5'
+                        stroke='currentColor'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      >
+                        <path stroke='none' d='M0 0h24v24H0z' />
+                        <line x1='4' y1='7' x2='20' y2='7' />
+                        <line x1='10' y1='11' x2='10' y2='17' />
+                        <line x1='14' y1='11' x2='14' y2='17' />
+                        <path d='M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12' />
+                        <path d='M9 4h6a2 2 0 0 1 2 2v2h-10v-2a2 2 0 0 1 2 -2' />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
     </div>
