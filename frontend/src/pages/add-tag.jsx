@@ -1,4 +1,31 @@
+import { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 export default function addTag() {
+  const navigate = useNavigate();
+  const [nameTag, setNameTag] = useState('');
+
+  const handleNameTagChange = (event) => {
+    setNameTag(event.target.value);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await axios
+        .post('http://localhost:3001/tag', {
+          name: nameTag,
+        })
+        .then(() => navigate('/'));
+      console.log(name);
+      setNameTag('');
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
       <h2 className='text-2xl text-gray-900 dark:text-white font-semibold mb-5 pt-5 text-center'>
@@ -7,17 +34,20 @@ export default function addTag() {
       <div className='flex justify-center'>
         <div className='w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-xl pb-5 dark:bg-gray-800 dark:border-gray-700'>
           <div className='p-6 space-y-4 md:space-y-6 sm:p-8'>
-            <form>
+            <form onSubmit={handleSubmit}>
               <div className='mb-6'>
                 <label
-                  htmlFor='email'
+                  htmlFor='name'
                   className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
                 >
                   Name
                 </label>
                 <input
-                  type='email'
-                  id='email'
+                  type='name'
+                  id='name'
+                  name='name'
+                  value={nameTag}
+                  onChange={handleNameTagChange}
                   className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                   placeholder=''
                   required

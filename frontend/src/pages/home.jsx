@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 export default function main() {
+  const navigate = useNavigate();
+
   const [noteTag, setNoteTag] = useState([]);
+  const [tag, setTag] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
 
@@ -22,7 +26,16 @@ export default function main() {
         console.error(error.message);
       }
     };
+    const fetchDataTags = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/tag');
+        setTag(response.data.data);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
     fetchData();
+    fetchDataTags();
   }, []);
 
   const handleDeleteNote = async (id) => {
@@ -30,6 +43,16 @@ export default function main() {
       const response = await axios.delete(`http://localhost:3001/note/${id}`);
       const newNoteTag = noteTag.filter((note) => note.id !== response.data.id);
       setNoteTag(newNoteTag);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  const handleDeleteTag = async (id) => {
+    try {
+      const response = await axios.delete(`http://localhost:3001/tag/${id}`);
+      const newTag = tag.filter((tag) => tag.id !== response.data.id);
+      setTag(newTag);
     } catch (error) {
       console.error(error.message);
     }
@@ -47,6 +70,10 @@ export default function main() {
     console.log(filtered);
     setFilteredData(filtered);
     setNoteTag(filtered);
+  };
+
+  const limitText = (text, count) => {
+    return text.slice(0, count) + (text.length > count ? '...' : '');
   };
 
   return (
@@ -104,7 +131,7 @@ export default function main() {
           </a>
         </div>
         <div>
-          <form className='mb-7'>
+          <form className='mb-2'>
             <label
               htmlFor='default-search'
               className='mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white'
@@ -146,13 +173,54 @@ export default function main() {
             </div>
           </form>
         </div>
+        <div className='mt-5 mb-7 flex'>
+          <div>
+            <h2 className='text-xl text-gray-900 dark:text-white font-semibold text-center mr-4'>
+              All Tags
+            </h2>
+          </div>
+          {tag.map((tag) => (
+            <div key={tag.id}>
+              <span
+                id='badge-dismiss-dark'
+                className='inline-flex items-center px-2 py-1 mr-2 text-sm font-medium text-gray-800 bg-gray-100 rounded dark:bg-gray-700 dark:text-gray-300'
+              >
+                {tag.name}
+                <button
+                  onClick={() => handleDeleteTag(tag.id)}
+                  type='button'
+                  className='inline-flex items-center p-0.5 ml-2 text-sm text-gray-400 bg-transparent rounded-sm hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-gray-300'
+                  data-dismiss-target='#badge-dismiss-dark'
+                  aria-label='Remove'
+                >
+                  <svg
+                    aria-hidden='true'
+                    className='w-3.5 h-3.5'
+                    fill='currentColor'
+                    viewBox='0 0 20 20'
+                    xmlns='http://www.w3.org/2000/svg'
+                  >
+                    <path
+                      fillRule='evenodd'
+                      d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                      clipRule='evenodd'
+                    />
+                  </svg>
+                  <span className='sr-only'>Remove badge</span>
+                </button>
+              </span>
+            </div>
+          ))}
+        </div>
         <div className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
           {noteTag.map((note) => (
             <div className='rounded' key={note.id}>
               <div className='w-full h-64 flex flex-col justify-between items-start bg-blue-300 rounded-lg border border-blue-300 mb-6 py-5 px-4'>
                 <div>
                   <h4 className='text-gray-800 font-bold mb-3'>{note.title}</h4>
-                  <p className='text-gray-800 text-sm'>{note.content}</p>
+                  <p className='text-gray-800 text-sm'>
+                    {limitText(note.content, 100)}
+                  </p>
                 </div>
                 <div className='flex'>
                   {note.Tag.map((tag) => (

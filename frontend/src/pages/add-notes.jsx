@@ -99,7 +99,8 @@ export default function addNote() {
                 >
                   Content
                 </label>
-                <input
+                <textarea
+                  rows='4'
                   id='content'
                   name='content'
                   value={content}
