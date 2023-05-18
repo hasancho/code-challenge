@@ -6,6 +6,7 @@ module.exports = {
     password: process.env.POSTGRES_PASSWORD_DEVELOPMENT,
     database: process.env.POSTGRES_DATABASE_DEVELOPMENT,
     host: process.env.POSTGRES_HOST_DEVELOPMENT,
+    port: process.env.POSTGRES_PORT_DEVELOPMENT,
     dialect: 'postgres',
   },
   test: {
@@ -20,6 +21,7 @@ module.exports = {
     password: process.env.POSTGRES_PASSWORD_PRODUCTION,
     database: process.env.POSTGRES_DATABASE_PRODUCTION,
     host: process.env.POSTGRES_HOST_PRODUCTION,
+    port: process.env.POSTGRES_PORT_PRODUCTION,
     dialect: 'postgres',
   },
 };
