@@ -49,6 +49,7 @@ const getAllNoteTags = async (req, res) => {
   try {
     const noteTags = await NoteTag.findAll({
       include: [{ model: Note }, { model: Tag }],
+      order: [[{ model: Note }, 'createdAt', 'DESC']],
     });
     const noteMap = new Map();
     noteTags.forEach((noteTag) => {
