@@ -10,6 +10,7 @@ export default function main() {
   const [tag, setTag] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+  const [isPinned, setIsPinned] = useState(false);
 
   function formatDate(dateString) {
     const date = new Date(dateString);
@@ -76,6 +77,21 @@ export default function main() {
     return text.slice(0, count) + (text.length > count ? '...' : '');
   };
 
+  const handlePinClick = (noteId) => {
+    setNoteTag((prevNoteTag) => {
+      return prevNoteTag.map((note) => {
+        if (note.id === noteId) {
+          return {
+            ...note,
+            isPinned: !note.isPinned,
+          };
+        }
+        return note;
+      });
+    });
+    setIsPinned((prevIsPinned) => !prevIsPinned);
+  };
+
   return (
     <div>
       <div className='mx-auto container py-5 px-6'>
@@ -130,7 +146,7 @@ export default function main() {
             </button>
           </a>
         </div>
-        <div>
+        <div className={`${isPinned ? 'mb-96' : ''}`}>
           <form className='mb-2'>
             <label
               htmlFor='default-search'
@@ -214,10 +230,45 @@ export default function main() {
         </div>
         <div className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
           {noteTag.map((note) => (
-            <div className='rounded' key={note.id}>
+            <div
+              className={`rounded ${
+                note.isPinned
+                  ? 'absolute w-80 top-0 left-0 right-0 mt-60 ml-2 z-50 p-4'
+                  : ''
+              }`}
+              key={note.id}
+            >
               <div className='w-full h-64 flex flex-col justify-between items-start bg-blue-300 rounded-lg border border-blue-300 mb-6 py-5 px-4'>
                 <div>
-                  <h4 className='text-gray-800 font-bold mb-3'>{note.title}</h4>
+                  <div className='flex justify-between'>
+                    <h4 className='text-gray-800 font-bold mb-3'>
+                      {note.title}
+                    </h4>
+                    <button
+                      onClick={() => handlePinClick(note.id)}
+                      className='w-8 h-8 rounded-full bg-blue-800 text-white flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 ring-offset-blue-300  focus:ring-black'
+                      aria-label='edit note'
+                      role='button'
+                    >
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        className='icon icon-tabler icon-tabler-pin'
+                        width='20'
+                        height='20'
+                        viewBox='0 0 24 24'
+                        strokeWidth='1.5'
+                        stroke='currentColor'
+                        fill='none'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      >
+                        <path stroke='none' d='M0 0h24v24H0z' />
+                        <circle cx='12' cy='5' r='2' />
+                        <path d='M10 12a2 2 0 0 0 4 0Z' />
+                        <path d='M12 5v14' />
+                      </svg>
+                    </button>
+                  </div>
                   <p className='text-gray-800 text-sm'>
                     {limitText(note.content, 100)}
                   </p>
