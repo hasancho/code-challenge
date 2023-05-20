@@ -117,49 +117,47 @@ const createNoteTag = async (req, res) => {
 };
 
 const updateNoteTag = async (req, res) => {
-  const { id } = req.params;
+  const id = req.params.id;
   const { title, content, tags } = req.body;
   try {
-    const note = await Note.findByPk(id);
-    if (!note) {
-      res.status(404).json({ message: `Note with id ${id} not founds` });
-      return;
-    }
+    const updatedNote = await Note.update(
+      { title, content },
+      { where: { id: id } }
+    );
 
-    await Note.update({ title, content });
+    await NoteTag.destroy({ where: { id_note: id } });
 
-    const noteTags = await NoteTag.findAll({
-      where: { id_note: id },
-    });
+    if (tags) {
+      const allTags = Array.isArray(tags) ? tags : JSON.parse(tags);
 
-    const existingTags = noteTags.map((noteTag) => noteTag.id_tag);
-
-    const tagsToRemove = existingTags.filter((tagId) => !tags.includes(tagId));
-    await NoteTag.destroy({
-      where: { id_note: id, id_tag: tagsToRemove },
-    });
-
-    const tagsToAdd = tags.filter((tagId) => !existingTags.includes(tagId));
-    for (let i = 0; i < tagsToAdd.length; i++) {
-      const tag = await Tag.findByPk(tagsToAdd[i]);
-      if (!tag) {
-        res
-          .status(500)
-          .json({ message: `Tag with id ${tagsToAdd[i]} not founds` });
-        return;
+      for (let i = 0; i < allTags.length; i++) {
+        const tag = await Tag.findByPk(allTags[i]);
+        if (!tag) {
+          res
+            .status(404)
+            .json({ message: `Tag with id ${allTags[i]} not found` });
+          return;
+        }
+        const dataNoteTag = {
+          id_note: id,
+          id_tag: allTags[i],
+        };
+        await NoteTag.create(dataNoteTag);
       }
-
+    } else {
       const dataNoteTag = {
         id_note: id,
-        id_tag: tagsToAdd[i],
+        id_tag: null,
       };
       await NoteTag.create(dataNoteTag);
     }
 
-    res.status(200).json({ message: 'Successed to update note' });
+    res
+      .status(200)
+      .json({ message: `Successed to update NoteTag with id ${id}` });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Failed to update note' });
+    res.status(500).json({ message: 'Failed to update note and tags' });
   }
 };
 
