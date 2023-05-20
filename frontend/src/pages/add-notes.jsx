@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL_API;
+
 export default function addNote() {
   const navigate = useNavigate();
 
@@ -36,7 +38,7 @@ export default function addNote() {
     try {
       console.log(selectedTags);
       const response = await axios
-        .post('http://localhost:3001/note', {
+        .post(`${BASE_URL}/note`, {
           title,
           content,
           tags: selectedTags.length > 0 ? selectedTags : null,

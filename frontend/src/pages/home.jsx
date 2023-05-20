@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL_API;
+
 export default function main() {
   const navigate = useNavigate();
 
@@ -21,7 +23,7 @@ export default function main() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/note');
+        const response = await axios.get(`${BASE_URL}/note`);
         setNoteTag(response.data.data);
       } catch (error) {
         console.error(error.message);
@@ -29,7 +31,7 @@ export default function main() {
     };
     const fetchDataTags = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/tag');
+        const response = await axios.get(`${BASE_URL}/tag`);
         setTag(response.data.data);
       } catch (error) {
         console.error(error.message);
@@ -41,9 +43,10 @@ export default function main() {
 
   const handleDeleteNote = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:3001/note/${id}`);
+      const response = await axios.delete(`${BASE_URL}/note/${id}`);
       const newNoteTag = noteTag.filter((note) => note.id !== response.data.id);
       setNoteTag(newNoteTag);
+      window.location.reload();
     } catch (error) {
       console.error(error.message);
     }
@@ -51,9 +54,10 @@ export default function main() {
 
   const handleDeleteTag = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:3001/tag/${id}`);
+      const response = await axios.delete(`${BASE_URL}/tag/${id}`);
       const newTag = tag.filter((tag) => tag.id !== response.data.id);
       setTag(newTag);
+      window.location.reload();
     } catch (error) {
       console.error(error.message);
     }

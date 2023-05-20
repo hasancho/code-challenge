@@ -2,6 +2,8 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL_API;
+
 export default function addTag() {
   const navigate = useNavigate();
   const [nameTag, setNameTag] = useState('');
@@ -15,7 +17,7 @@ export default function addTag() {
 
     try {
       const response = await axios
-        .post('http://localhost:3001/tag', {
+        .post(`${BASE_URL}/tag`, {
           name: nameTag,
         })
         .then(() => navigate('/'));

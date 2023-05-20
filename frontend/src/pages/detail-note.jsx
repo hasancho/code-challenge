@@ -3,6 +3,8 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import jsPDF from 'jspdf';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL_API;
+
 export default function detailNote() {
   const [noteTag, setNoteTag] = useState([]);
   const { id } = useParams();
@@ -10,7 +12,7 @@ export default function detailNote() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/note/${id}`);
+        const response = await axios.get(`${BASE_URL}/note/${id}`);
         setNoteTag(response.data.data);
       } catch (error) {
         console.error(error.message);
